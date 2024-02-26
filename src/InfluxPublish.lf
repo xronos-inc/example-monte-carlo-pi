@@ -1,0 +1,43 @@
+target Python {
+    keepalive: True
+}
+
+preamble {=
+    # pylint: disable=reimported,wrong-import-position,wrong-import-order,ungrouped-imports,import-outside-toplevel
+
+    import requests
+    import socket
+=}
+
+reactor InfluxPublisher(telegraf_url = "http://0.0.0.0:8186/telegraf") {
+    input points_generated
+    input estimate
+    input error
+
+    state telegraf_session
+    state hostname
+
+    reaction(startup) {=
+        self.telegraf_session = requests.Session()
+        self.hostname = socket.gethostname()
+    =}
+
+    reaction(shutdown) {=
+        self.telegraf_session.close()
+    =}
+
+    reaction(points_generated, estimate, error) {=
+        timestamp_ns = lf.time.logical_elapsed()
+        try:
+            self.telegraf_session.post(
+                self.telegraf_url,
+                data = f"influx-test,language=py,hostname={self.hostname} points={points_generated.value},estimate={estimate.value},error={error.value} {timestamp_ns}",
+                headers = {"Content-Type": "application/x-www-form-urlencoded"})
+        except requests.RequestException as e:
+            print(e)
+    =}
+}
+
+main reactor {
+    publisher = new InfluxPublisher()
+}
