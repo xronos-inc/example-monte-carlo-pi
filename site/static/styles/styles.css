@@ -1,0 +1,99 @@
+/* Reset some default styling */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Apply a smooth font throughout the website */
+body {
+    font-family: 'Arial Rounded MT Bold', sans-serif;
+    background: linear-gradient(45deg, #333, #555);
+    color: #dcdcdc;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+    height: 100vh; /* Full viewport height */
+}
+
+/* Container for centered content */
+.container {
+    max-width: 750px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+/* Style the header with more modern colors and spacing */
+header {
+    background: #333;
+    display: inline-block; /* Apply the gradient only to the text area */
+    width: 100%;
+}
+
+header h1 {
+    color: #007bff;
+    font-size: 3em;
+}
+
+header h2 {
+    color: #6c757d;
+    font-size: 1.5rem;
+    text-transform: lowercase;
+}
+
+/* Container for icons with a subtle shadow for depth */
+.icon-container {
+    display: flex;
+    flex-wrap: wrap; /* Allows items to wrap */
+    justify-content: center; /* Centers items horizontally */
+    align-items: center; /* Aligns items vertically */
+    padding: 10px;
+    gap: 10px; /* Provides more space between icons */
+    background: #333; /* White background to make icons pop */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    border-radius: 8px; /* Rounded corners for the container */
+}
+
+/* Style for icon buttons with a smooth transition */
+.icon-button {
+    width: 72px; /* Set a fixed width */
+    height: 72px; /* Set a fixed height */
+    display: flex; /* Use flex to center the image inside the button */
+    justify-content: center;
+    align-items: center;
+    background-color: #e0e1e7; /* Light color for the button background */
+    border-radius: 8px; /* Rounded corners for buttons */
+    cursor: pointer; /* Cursor pointer to indicate clickable items */
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transition for hover effects */
+    margin-bottom: 10px;
+}
+
+/* Hover effect for icon buttons */
+.icon-button:disabled {
+    transform: translateY(-5px); /* Slightly raise the button on hover */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Larger shadow on hover for a 'lifting' effect */
+    filter: invert(100%); /* Invert colors on hover */
+}
+
+.icon-button img {
+    max-width: 95%; /* Slightly smaller images to fit nicely within the button */
+    max-height: 95%;
+    transition: filter 0.3s ease; /* Smooth transition for the filter effect */
+}
+
+/* Large and readable metris display */
+.metrics-display {
+    font-size: 1.5rem;
+    color: #888;
+    vertical-align: middle;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+/* Position the footer image and give it some spacing */
+footer {
+    width: 100%;
+    padding: 10px 0;
+    background-color: #333;
+    box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+}

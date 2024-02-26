@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-eval' 'unsafe-inline' data: filesystem: about: blob: ws: wss:">
+    <title>Monte Carlo Pi</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="static/styles/styles.css">
+
+    <!-- chart.js includes -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- button actions -->
+    <script type=text/javascript>
+        // issue an HTTP GET request to send a command to the target
+        function command(arg){
+            var command_url = window.location.protocol + "//" + window.location.host + window.location.pathname;
+            command_url = command_url.substring(0, command_url.lastIndexOf('/')) + "/";
+            command_url += arg;
+            xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    enable_command_buttons(true);
+                }
+            }
+            xhr.open('get', command_url, true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+            xhr.send();
+            enable_command_buttons(false);
+        }
+
+        function enable_command_buttons(enable = true){
+            const buttons = document.getElementsByClassName("icon-button");
+            for (const button of buttons) {
+                button.disabled = !enable;
+            }
+        }
+      </script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h2>Monte Carlo Pi Estimator</h2>
+        </header>
+        
+        <!-- buttons -->
+        <div class="icon-container">
+            <button class="icon-button"><img src="static/images/button-play.png" alt="play" onclick="command('play')"></button>
+            <button class="icon-button"><img src="static/images/button-shutdown.png" alt="shutdown" onclick="command('shutdown')"></button>
+        </div>
+
+        <!-- metrics display -->
+        <div class="metrics-display">
+            <p>Error: <span id="error-value">0</span> %
+            <br/>Estimate: <span id="estimate-value">0</span>
+            <br/>Simulations: <span id="simulations-value">0</span></p>
+        </div>
+
+        <!-- graphs -->
+        <footer>
+            <div style="height: 200px; width: 100%;">
+                <canvas id="estimateChart" width="90%"></canvas>
+            </div>
+            <br/>
+            <div style="height: 200px; width: 100%;">
+                <canvas id="errorChart" width="90%"></canvas>
+            </div>
+        </footer>
+
+        <!-- dynamic content -->
+        <script type=text/javascript>
+            var socket = io.connect('http://' + document.domain + ':' + location.port + '/montecarlo');
+            
+            var estimateCtx = document.getElementById('estimateChart').getContext('2d');
+            var estimateChart = new Chart(estimateCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'Estimate',
+                            data: []
+                        },
+                        {
+                            label: 'Target',
+                            data: []
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    lineTension: 0,
+                    elements: {
+                        point:{
+                            radius: 0
+                        }
+                    },
+                    animation: false,
+                    animations: {
+                        colors: false
+                    },
+                    transitions: {
+                        active: {
+                            animation: {
+                                duration: 0
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear'
+                        }
+                    }
+                }
+            });
+
+            var errorCtx = document.getElementById('errorChart').getContext('2d');
+            var errorChart = new Chart(errorCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'Error',
+                            data: []
+                        },
+                        {
+                            label: 'Target',
+                            data: []
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    lineTension: 0,
+                    elements: {
+                        point:{
+                            radius: 0
+                        }
+                    },
+                    animation: false,
+                    animations: {
+                        colors: false
+                    },
+                    transitions: {
+                        active: {
+                            animation: {
+                                duration: 0
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            title: 'simulation'
+                        }
+                    }
+                }
+            });
+      
+            socket.on('newdata', function(msg) {
+                // console.log("Received", msg);
+
+                // Update estimate chart
+                estimateChart.data.labels.push(msg.pointsgenerated);
+                estimateChart.data.datasets[0].data.push(msg.estimate);
+                estimateChart.data.datasets[1].data.push(Math.PI); // target
+                estimateChart.update();
+                
+                // Update error chart
+                errorChart.data.labels.push(msg.pointsgenerated);
+                errorChart.data.datasets[0].data.push(msg.error);
+                errorChart.data.datasets[1].data.push(0); // target
+                errorChart.update();
+            
+                // update metrics
+                var estimateValue = document.getElementById("estimate-value")
+                estimateValue.innerHTML=msg.estimate.toFixed(5);
+                var errorValue = document.getElementById("error-value")
+                errorValue.innerHTML=msg.error.toFixed(5);
+                var simulationsValue = document.getElementById("simulations-value")
+                simulationsValue.innerHTML=msg.pointsgenerated;
+            });
+        </script>
+    </div>
+</body>
+</html>

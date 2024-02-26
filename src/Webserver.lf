@@ -1,0 +1,130 @@
+target Python {
+    keepalive: True
+}
+
+preamble {=
+    # pylint: disable=reimported,wrong-import-position,wrong-import-order,ungrouped-imports,import-outside-toplevel
+
+    import threading
+    import os
+    import signal
+    import flask
+    import flask_socketio
+=}
+
+reactor WebserverService(port = 8080, update_graph_interval = 100){
+    input points_generated
+    input estimate
+    input error
+
+    state app
+    state socketio
+    state thread
+
+    physical action poweroff_requested
+    physical action run_requested
+
+    output run
+    
+    preamble {=
+        def index(self):
+            """ '/' endpoint """
+            print(f"Endpoint '/': Accessed by {flask.request.remote_addr}")
+            return flask.render_template("index.html")
+
+        def favicon(self):
+            """ '/favicon.ico' endpoint """
+            print(f"Endpoint '/favicon.ico': Accessed by {flask.request.remote_addr}")
+            return flask.send_from_directory(
+                os.path.join(self.app.root_path, "static/images"),
+                "favicon.ico",
+                mimetype="image/vnd.microsoft.icon")
+
+        def manifest(self):
+            """ '/manifest.json' endpoint """
+            print(f"Endpoint '/manifest.json': Accessed by {flask.request.remote_addr}")
+            return flask.send_from_directory(
+                os.path.join(self.app.root_path, "static"),
+                "manifest.json")
+
+        def connect(self):
+            """ log websocket client connect """
+            print(f"WebSocket client connected from {flask.request.remote_addr}: /trajectory")
+
+        def play_handler(self, action):
+            """ Request play action """
+            print(f"Endpoint '/play': Accessed by {flask.request.remote_addr}")
+            action.schedule(0)
+            return ""
+
+        def poweroff_handler(self, action):
+            """ Request shutdown of application """
+            print(f"Endpoint '/shutdown': Accessed by {flask.request.remote_addr}")
+            action.schedule(0)
+            return ""
+
+        def server(self):
+            """ non-terminating Flask server """
+            print("Starting Flask server")
+            self.socketio.run(self.app,
+                              host = "0.0.0.0",
+                              port = self.port,
+                              allow_unsafe_werkzeug = True)
+            print("Flask server completed")
+    =}
+
+    reaction(startup) -> run_requested, poweroff_requested {=
+        # Initialize Flask app and SocketIO
+        self.app = flask.Flask(__name__)
+        self.app.config["TEMPLATES_AUTO_RELOAD"] = True
+
+        self.app.add_url_rule("/", "index", self.index)
+        self.app.add_url_rule("/favicon.ico", "favicon.ico", self.favicon)
+        self.app.add_url_rule("/manifest.json", "manifest.json", self.manifest)
+        self.app.add_url_rule(
+            "/play",
+            "play",
+            lambda action = run_requested: self.play_handler(action) )
+        self.app.add_url_rule(
+            "/shutdown",
+            "shutdown",
+            lambda action = poweroff_requested: self.poweroff_handler(action) )
+
+        self.socketio = flask_socketio.SocketIO(self.app, cors_allowed_origins = "*")
+        self.socketio.on_event(message="connect", handler=self.connect, namespace="/montecarlo")
+
+        self.thread = threading.Thread(target = self.server)
+        self.thread.start()
+    =}
+    
+    reaction(poweroff_requested) {=
+        lf.request_stop()
+    =}
+
+    reaction(run_requested) -> run {=
+        run.set(True)
+    =}
+
+    state output_count = 0
+    reaction(points_generated, estimate, error) {=
+        if points_generated.value // self.update_graph_interval > self.output_count:
+            data = dict()
+            data["pointsgenerated"] = points_generated.value
+            data["error"]     = error.value
+            data["estimate"]  = estimate.value
+            self.socketio.emit("newdata", data, namespace="/montecarlo")
+            self.output_count = points_generated.value // self.update_graph_interval
+    =}
+
+    reaction(shutdown) {=
+        print("Webserver shutting down.")
+        # werkzeug.server.shutdown is deprecated; self.socketio.stop() throws.
+        # Instead, give the thread a SIGINT and it will exit gracefully
+        signal.pthread_kill(self.thread.ident, signal.SIGINT)
+        self.thread.join()
+    =}
+}
+
+main reactor Webserver {
+    server = new WebserverService()
+}

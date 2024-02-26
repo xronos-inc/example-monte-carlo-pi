@@ -1,0 +1,14 @@
+{
+    "manifest_version": 3,
+    "version": "1.0",
+    "name": "Monte Carlo Pi Estimator",
+    "short_name": "Pi Estimator",
+    "description": "Linga Franca implementation a Monte Carlo estimation of pi",
+    "lang": "en-US",
+    "start_url": "./",
+    "display": "standalone",
+    "theme_color": "#000000",
+    "background_color": "#ffffff",
+    "content_security_policy": "default-src * 'unsafe-eval' 'unsafe-inline' data: filesystem: about: blob: ws: wss:"
+  }
+  

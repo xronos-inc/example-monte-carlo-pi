@@ -1,0 +1,6 @@
+.DS_Store
+.bkp
+bin/
+include/
+src-gen/
+.venv/

@@ -1,0 +1,97 @@
+target Python {
+    keepalive: True
+}
+
+preamble {=
+    # pylint: disable=reimported,wrong-import-position,wrong-import-order,ungrouped-imports,import-outside-toplevel
+    import random
+    import math
+=}
+
+reactor MonteCarloSimulate(
+    workers = 10,
+    simulation_interval_ms = 10 ms,
+    count = 10
+) {
+    state points_generated = 0
+
+    input run
+
+    # point generated was in unit circle?
+    # 1 if point was outside circle, 1.0 if within
+    output unit_circle_point
+
+    logical action trigger
+    reaction(run) -> trigger {=
+        self.points_generated = 0
+        trigger.schedule(self.simulation_interval_ms)
+    =}
+
+    # run a single simulation and generate a point
+    reaction(trigger) -> unit_circle_point {=
+        if self.points_generated < self.count:
+            # generate a point in the unit square
+            x = random.uniform(-1, 1)
+            y = random.uniform(-1, 1)
+
+            # distance from origin
+            radius = x**2 + y**2
+
+            # point is within unit circle?
+            unit_circle_point.set(1.0 if radius <= 1.0 else 0.0)
+
+            # increment simulation count
+            self.points_generated += 1
+
+            # schedule the next simulation
+            trigger.schedule(self.simulation_interval_ms)
+    =}
+}
+
+reactor Accumulate(workers = 10) {
+    state square_points = 0.0
+    state unit_circle_points = 0.0
+
+    input [workers] results
+    output estimate
+    output error
+    output points_generated
+
+    reaction(results) -> estimate, error, points_generated {=
+        for result in results:
+            if result.is_present:
+                self.square_points += 1
+                self.unit_circle_points += result.value
+        points_generated.set(self.square_points)
+        estimate.set(4.0 * self.unit_circle_points / self.square_points)
+        error.set(math.pi - estimate.value)
+    =}
+}
+
+reactor ConsolePrinter(print_every = 1000) {
+    input points_generated
+    input estimate
+    input error
+
+    state output_count = 0
+
+    reaction(points_generated, estimate, error) {=
+        if points_generated.value // self.print_every > self.output_count:
+            print(f"%8d: %6.5f (%6.3f%%)" %
+                (points_generated.value,
+                estimate.value,
+                error.value * 100.0)
+            )
+            self.output_count = points_generated.value // self.print_every
+    =}
+}
+
+main reactor MonteCarloPi(workers = 100, simulations_per_worker = 10000) {
+    simulater = new [workers] MonteCarloSimulate(count = simulations_per_worker)
+    accumulator = new Accumulate(workers = workers)
+    printer = new ConsolePrinter()
+    simulater.unit_circle_point -> accumulator.results
+    accumulator.points_generated -> printer.points_generated
+    accumulator.error -> printer.error
+    accumulator.estimate -> printer.estimate
+}

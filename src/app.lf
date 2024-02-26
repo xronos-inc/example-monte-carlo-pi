@@ -1,0 +1,28 @@
+target Python {
+    keepalive: True
+}
+
+import MonteCarloSimulate from "MonteCarloPi.lf"
+import Accumulate from "MonteCarloPi.lf"
+import ConsolePrinter from "MonteCarloPi.lf"
+import WebserverService from "Webserver.lf"
+
+preamble {=
+    # pylint: disable=reimported,wrong-import-position,wrong-import-order,ungrouped-imports,import-outside-toplevel
+    
+=}
+
+main reactor (workers = 10, simulations_per_worker = 1000) {
+    simulator = new [workers] MonteCarloSimulate(count = simulations_per_worker)
+    accumulator = new Accumulate(workers = workers)
+    printer = new ConsolePrinter(print_every = 1000)
+    webserver = new WebserverService()
+    simulator.unit_circle_point -> accumulator.results
+    accumulator.points_generated -> webserver.points_generated
+    accumulator.points_generated -> printer.points_generated
+    accumulator.error -> webserver.error
+    accumulator.error -> printer.error
+    accumulator.estimate -> webserver.estimate
+    accumulator.estimate -> printer.estimate
+    ( webserver.run )+ -> simulator.run
+}
