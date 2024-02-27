@@ -36,7 +36,7 @@ reactor InfluxPublisher(telegraf_url = "http://0.0.0.0:8186/telegraf") {
                 data = f"example-monte-carlo-pi,language=py,hostname={self.hostname} points={points_generated.value},estimate={estimate.value},error={error.value} {timestamp_ns}",
                 headers = {"Content-Type": "application/x-www-form-urlencoded"})
         except requests.RequestException as e:
-            print(e)
+            pass
     =}
 }
 

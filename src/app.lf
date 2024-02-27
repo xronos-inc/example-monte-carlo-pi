@@ -13,13 +13,13 @@ preamble {=
     
 =}
 
-main reactor (workers = 10, simulations_per_worker = 10000) {
-    simulator = new [workers] MonteCarloSimulate(count = simulations_per_worker)
+main reactor (workers = 10, simulations_per_worker = 2500) {
+    simulators = new [workers] MonteCarloSimulate(count = simulations_per_worker)
     accumulator = new Accumulate(workers = workers)
     printer = new ConsolePrinter(print_every = 1000)
     webserver = new WebserverService()
     publisher = new InfluxPublisher()
-    simulator.unit_circle_point -> accumulator.results
+    simulators.unit_circle_point -> accumulator.results
     accumulator.points_generated -> webserver.points_generated
     accumulator.points_generated -> printer.points_generated
     accumulator.points_generated -> publisher.points_generated
@@ -29,5 +29,8 @@ main reactor (workers = 10, simulations_per_worker = 10000) {
     accumulator.estimate -> webserver.estimate
     accumulator.estimate -> printer.estimate
     accumulator.estimate -> publisher.estimate
-    ( webserver.run )+ -> simulator.run
+    ( webserver.run )+ -> simulators.run
+    ( webserver.restart )+ -> simulators.restart
+    webserver.restart -> accumulator.restart
+    webserver.restart -> printer.restart
 }

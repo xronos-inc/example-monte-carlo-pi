@@ -11,11 +11,12 @@ preamble {=
 reactor MonteCarloSimulate(
     workers = 10,
     simulation_interval_ms = 10 ms,
-    count = 10
+    count = 2500
 ) {
     state points_generated = 0
 
     input run
+    input restart
 
     # point generated was in unit circle?
     # 1 if point was outside circle, 1.0 if within
@@ -25,6 +26,10 @@ reactor MonteCarloSimulate(
     reaction(run) -> trigger {=
         self.points_generated = 0
         trigger.schedule(self.simulation_interval_ms)
+    =}
+
+    reaction(restart) {=
+        self.points_generated = 0
     =}
 
     # run a single simulation and generate a point
@@ -53,6 +58,7 @@ reactor Accumulate(workers = 10) {
     state unit_circle_points = 0.0
 
     input [workers] results
+    input restart
     output estimate
     output error
     output points_generated
@@ -66,14 +72,25 @@ reactor Accumulate(workers = 10) {
         estimate.set(4.0 * self.unit_circle_points / self.square_points)
         error.set(math.pi - estimate.value)
     =}
+
+    reaction(restart) {=
+        self.square_points = 0.0
+        self.unit_circle_points = 0.0
+    =}
 }
 
 reactor ConsolePrinter(print_every = 1000) {
+    input restart
     input points_generated
     input estimate
     input error
 
     state output_count = 0
+
+    reaction(restart) {=
+        self.output_count = 0
+        print("Restart requested")
+    =}
 
     reaction(points_generated, estimate, error) {=
         if points_generated.value // self.print_every > self.output_count:
@@ -86,7 +103,7 @@ reactor ConsolePrinter(print_every = 1000) {
     =}
 }
 
-main reactor MonteCarloPi(workers = 100, simulations_per_worker = 10000) {
+main reactor MonteCarloPi(workers = 10, simulations_per_worker = 2500) {
     simulater = new [workers] MonteCarloSimulate(count = simulations_per_worker)
     accumulator = new Accumulate(workers = workers)
     printer = new ConsolePrinter()

@@ -47,6 +47,7 @@
         <!-- buttons -->
         <div class="icon-container">
             <button class="icon-button"><img src="static/images/button-play.png" alt="play" onclick="command('play')"></button>
+            <button class="icon-button"><img src="static/images/button-restart.png" alt="play" onclick="command('restart'); resetCharts()"></button>
             <button class="icon-button"><img src="static/images/button-shutdown.png" alt="shutdown" onclick="command('shutdown')"></button>
         </div>
 
@@ -184,6 +185,17 @@
                 var simulationsValue = document.getElementById("simulations-value")
                 simulationsValue.innerHTML=msg.pointsgenerated;
             });
+
+            function resetCharts() {
+                estimateChart.data.datasets[0].data = [];
+                estimateChart.data.datasets[1].data = [];
+                errorChart.data.datasets[0].data = [];
+                errorChart.data.datasets[1].data = [];
+                estimateChart.clear();
+                errorChart.clear();
+                estimateChart.update();
+                errorChart.update();
+            }
         </script>
     </div>
 </body>
