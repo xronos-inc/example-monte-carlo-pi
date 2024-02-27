@@ -22,8 +22,8 @@ echo lfc compile
 lfc src/app.lf
 
 # symmlink website into the application folder
-ln -sf ${PWD}/site/static src-gen/app/
-ln -sf ${PWD}/site/templates src-gen/app/
+ln -sf ${PWD}/site/static src-gen/app/static
+ln -sf ${PWD}/site/templates src-gen/app/templates
 
 echo running application
-python -u src-gen/app/app.py
+source bin/app
