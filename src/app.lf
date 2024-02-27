@@ -13,7 +13,7 @@ preamble {=
     
 =}
 
-main reactor (workers = 10, simulations_per_worker = 1000) {
+main reactor (workers = 10, simulations_per_worker = 10000) {
     simulator = new [workers] MonteCarloSimulate(count = simulations_per_worker)
     accumulator = new Accumulate(workers = workers)
     printer = new ConsolePrinter(print_every = 1000)
