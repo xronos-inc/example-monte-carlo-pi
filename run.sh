@@ -22,8 +22,8 @@ echo lfc compile
 lfc src/app.lf
 
 # symmlink website into the application folder
-ln -sf ${PWD}/site/static src-gen/app/static
-ln -sf ${PWD}/site/templates src-gen/app/templates
+ln -sf ${PWD}/site/static src-gen/app
+ln -sf ${PWD}/site/templates src-gen/app
 
 echo running application
 source bin/app
