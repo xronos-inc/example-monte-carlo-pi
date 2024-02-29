@@ -4,3 +4,4 @@ bin/
 include/
 src-gen/
 .venv/
+links.md
