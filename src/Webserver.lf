@@ -54,7 +54,7 @@ reactor WebserverService(port = 8080, update_graph_interval = 100){
 
         def connect(self):
             """ log websocket client connect """
-            print(f"WebSocket client connected from {flask.request.remote_addr}: /trajectory")
+            print(f"WebSocket client connected from {flask.request.remote_addr}: /montecarlo")
 
         def play_handler(self, action):
             """ Request play action """
@@ -82,28 +82,6 @@ reactor WebserverService(port = 8080, update_graph_interval = 100){
                               port = self.port,
                               allow_unsafe_werkzeug = True)
             print("Flask server completed")
-
-        def print_instance_url(self):
-            """ print the instance URL if executing within an EC2 instance """
-            host = "0.0.0.0"
-            try:
-                # is EC2 instance with IMDSv2?
-                token = requests.put(
-                    "http://169.254.169.254/latest/api/token",
-                    headers = {"X-aws-ec2-metadata-token-ttl-seconds": "21600"},
-                    timeout = 1
-                )
-                if token.ok:
-                    response = requests.get(
-                        "http://169.254.169.254/latest/meta-data/public-ipv4",
-                        headers = {"X-aws-ec2-metadata-token": token.content.decode("utf-8")},
-                        timeout = 1
-                    )
-                    if response.ok:
-                        host = str(ipaddress.ip_address(response.content.decode("utf-8")))
-                        print(f"\n>>> Monte Carlo Web UI: http://{host}:{self.port}\n")
-            except (ValueError, requests.exceptions.RequestException):
-                pass
     =}
 
     reaction(startup) -> run_requested, restart_requested, poweroff_requested {=
@@ -129,9 +107,6 @@ reactor WebserverService(port = 8080, update_graph_interval = 100){
 
         self.socketio = flask_socketio.SocketIO(self.app, cors_allowed_origins = "*")
         self.socketio.on_event(message="connect", handler=self.connect, namespace="/montecarlo")
-
-        # if running on an EC2 instance, print its public IP address after any other addresses output by Flask
-        threading.Thread(target=lambda: (time.sleep(1), self.print_instance_url())).start()
 
         self.thread = threading.Thread(target = self.server)
         self.thread.start()
