@@ -1,0 +1,17 @@
+[package]
+name = "lf"
+version = "0.1.0"
+
+[properties]
+
+[[app]]
+name = "app"
+main = "src/app.lf"
+target = "Python"
+platform = "Native"
+
+[app.dependencies]
+
+[app.properties]
+tracing = true
+trace-plugin = "telegraf_lf_trace_plugin"

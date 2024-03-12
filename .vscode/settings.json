@@ -1,0 +1,17 @@
+{
+    "terminal.integrated.env.linux": {
+        "LF_TELEGRAF_HOST_NAME": "localhost",
+        "LF_TELEGRAF_PORT": "8094",
+        "LF_TELEGRAF_URL_PATH": "/telegraf"
+    },
+    "terminal.integrated.env.osx": {
+        "LF_TELEGRAF_HOST_NAME": "localhost",
+        "LF_TELEGRAF_PORT": "8094",
+        "LF_TELEGRAF_URL_PATH": "/telegraf"
+    },
+    "terminal.integrated.env.windows": {
+        "LF_TELEGRAF_HOST_NAME": "localhost",
+        "LF_TELEGRAF_PORT": "8094",
+        "LF_TELEGRAF_URL_PATH": "/telegraf"
+    }
+}
