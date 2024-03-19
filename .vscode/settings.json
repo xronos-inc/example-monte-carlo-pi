@@ -13,5 +13,9 @@
         "LF_TELEGRAF_HOST_NAME": "localhost",
         "LF_TELEGRAF_PORT": "8094",
         "LF_TELEGRAF_URL_PATH": "/telegraf"
+    },
+    {
+        "python.terminal.activateEnvInCurrentTerminal": true,
+        "python.defaultInterpreterPath": "./venv/bin/python"
     }
 }
