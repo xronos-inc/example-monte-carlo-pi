@@ -1,5 +1,6 @@
 target Python {
-    keepalive: True
+    keepalive: True,
+    files: ["../site/static", "../site/templates"]
 }
 
 import MonteCarloSimulate from "MonteCarloPi.lf"
