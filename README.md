@@ -33,7 +33,7 @@ Launch the web app in your browser by navigating to the IP address printed when 
 
 ### Run the application in a Python virtual environment
 
-To levererate the `Lingua Franca: Build and Run` command from within Visual Studio:
+To leverage the `Lingua Franca: Build and Run` command from within Visual Studio:
 
 1. Use the `Python: Create environment...` command in Visual Studio to configure a Python virutal environment.
 1. When given the option to select a dependencies file, select `requirements.txt`.
