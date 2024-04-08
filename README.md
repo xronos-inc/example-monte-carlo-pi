@@ -29,6 +29,10 @@ Then use `Lingua Franca: Build and Run` from within Visual Studio. You'll be pro
 
 Launch the web app in your browser by navigating to the IP address printed when the application starts. Note the default port of 8080.
 
+## Visualize in Grafana
+
+If you are running the Xronos Dashboard stack (InfluxDB, InfluxDB, Grafana), open the Pi dashboard to visualize data in Grafana.
+
 ## Alternate methods to build and run
 
 ### Run the application in a Python virtual environment
