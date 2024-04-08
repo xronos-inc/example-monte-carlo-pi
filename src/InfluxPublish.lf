@@ -17,26 +17,36 @@ reactor InfluxPublisher(telegraf_url = "http://0.0.0.0:8186/telegraf") {
 
     state telegraf_session
     state hostname
+    state telegraf_session_active
 
     reaction(startup) {=
         self.telegraf_session = requests.Session()
         self.hostname = socket.gethostname()
+        self.telegraf_session_active = True
     =}
 
     reaction(shutdown) {=
-        self.telegraf_session.close()
+        if self.telegraf_session_active:
+            self.telegraf_session.close()
+            self.telegraf_session_active = False
     =}
 
     reaction(points_generated, estimate, error) {=
-        #timestamp_ns = lf.time.physical()
         timestamp_ns = int(time.time() * 1e9)
-        try:
-            self.telegraf_session.post(
-                self.telegraf_url,
-                data = f"example-monte-carlo-pi,language=py,hostname={self.hostname} points={points_generated.value},estimate={estimate.value},error={error.value} {timestamp_ns}",
-                headers = {"Content-Type": "application/x-www-form-urlencoded"})
-        except requests.RequestException as e:
-            pass
+        if self.telegraf_session_active:
+            try:
+                response = self.telegraf_session.post(
+                    self.telegraf_url,
+                    data = f"example-monte-carlo-pi,language=py,hostname={self.hostname} points={points_generated.value},estimate={estimate.value},error={error.value} {timestamp_ns}",
+                    headers = {"Content-Type": "application/x-www-form-urlencoded"})
+                if not response.ok:
+                    print("Unable to post to Telegraf; disabling.")
+                    self.telegraf_session_active = False
+                    self.telegraf_session.close()
+            except requests.RequestException as e:
+                print("Unable to post to Telegraf; disabling.")
+                self.telegraf_session_active = False
+                self.telegraf_session.close()
     =}
 }
 
