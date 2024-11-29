@@ -2,6 +2,12 @@
 
 # SPDX-FileCopyrightText: © 2024 Xronos Inc.
 # SPDX-License-Identifier: BSD-3-Clause
+# 
+# SPDX-FileCopyrightText: © 2023 Jeff C. Jensen 
+# SPDX-License-Identifier: MIT
+# 
+# This file contains portions from Jeff C. Jensen under MIT
+# and modifications by Xronos Inc. under BSD-3-Clause.
 
 set -e
 
