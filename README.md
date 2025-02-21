@@ -13,9 +13,9 @@ Imagine a square with a side length of 2, within which a circle with a radius of
 ## Prerequisites
 
 - Bash (or you may review the run script to replicate steps otherwise)
-- Python 3.10 or later
-- Python virtual environment packages
-- Lingua Franca compiler
+- Python 3.10
+- Python virtual environment
+- Lingua Franca compiler (tested with v0.9.0)
 
 ## Run the Application
 
@@ -27,7 +27,7 @@ pip install -r requirements.txt
 
 Then use `Lingua Franca: Build and Run` from within Visual Studio. You'll be prompted to open a web browser.
 
-Launch the web app in your browser by navigating to the IP address printed when the application starts. Note the default port of 8080.
+Launch the web app in your browser by navigating to the IP address printed when the application starts. Note the default port of 8085.
 
 ## Visualize in Grafana
 

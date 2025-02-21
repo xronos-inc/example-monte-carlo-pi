@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: © 2024 Xronos Inc.
+# SPDX-FileCopyrightText: (c) 2024 Xronos Inc.
 # SPDX-License-Identifier: BSD-3-Clause
 
 target Python {
@@ -18,7 +18,7 @@ preamble {=
     import time
 =}
 
-reactor WebserverService(port = 8080, update_graph_interval = 100){
+reactor WebserverService(port = 8085, update_graph_interval = 100){
     input points_generated
     input estimate
     input error

@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# SPDX-FileCopyrightText: © 2024 Xronos Inc.
+# SPDX-FileCopyrightText: (c) 2024 Xronos Inc.
 # SPDX-License-Identifier: BSD-3-Clause
 # 
-# SPDX-FileCopyrightText: © 2023 Jeff C. Jensen 
+# SPDX-FileCopyrightText: (c) 2023 Jeff C. Jensen 
 # SPDX-License-Identifier: MIT
 # 
 # This file contains portions from Jeff C. Jensen under MIT
