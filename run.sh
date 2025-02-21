@@ -14,7 +14,7 @@ set -e
 # install and activate python virtual environment
 if [ ! -f .venv/bin/activate ]; then
     echo creating python virtual environment
-    python3 -m venv .venv
+    python3.10 -m venv .venv
     source .venv/bin/activate
     echo installing python requirements
     pip3 install -r requirements.txt
